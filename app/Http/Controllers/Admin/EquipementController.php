@@ -11,7 +11,7 @@ class EquipementController extends Controller
 {
     public function index()
     {
-        $equipements = Equipement::with('user')->latest()->paginate(10);
+        $equipements = Equipement::latest()->paginate(10);
         return view('admin.equipements.index', compact('equipements'));
     }
     
@@ -35,6 +35,11 @@ class EquipementController extends Controller
         
         return redirect()->route('admin.equipements.index')
             ->with('success', 'Équipement ajouté avec succès.');
+    }
+    
+    public function show(Equipement $equipement)
+    {
+        return view('admin.equipements.show', compact('equipement'));
     }
     
     public function edit(Equipement $equipement)
@@ -64,45 +69,5 @@ class EquipementController extends Controller
         
         return redirect()->route('admin.equipements.index')
             ->with('success', 'Équipement supprimé avec succès.');
-    }
-    
-    // API Methods for AJAX
-    public function apiIndex()
-    {
-        $equipements = Equipement::latest()->take(10)->get();
-        return response()->json($equipements);
-    }
-    
-    public function apiStore(Request $request)
-    {
-        $request->validate([
-            'nom' => 'required|string|max:255',
-            'type' => 'required|string',
-            'date_acquisition' => 'required|date',
-            'etat' => 'required|string',
-            'localisation' => 'required|string'
-        ]);
-        
-        $equipement = Equipement::create($request->all());
-        return response()->json($equipement, 201);
-    }
-    
-    public function apiUpdate(Request $request, Equipement $equipement)
-    {
-        $request->validate([
-            'nom' => 'required|string|max:255',
-            'type' => 'required|string',
-            'etat' => 'required|string',
-            'localisation' => 'required|string'
-        ]);
-        
-        $equipement->update($request->all());
-        return response()->json($equipement);
-    }
-    
-    public function apiDestroy(Equipement $equipement)
-    {
-        $equipement->delete();
-        return response()->json(['message' => 'Équipement supprimé avec succès.']);
     }
 }

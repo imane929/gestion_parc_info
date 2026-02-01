@@ -626,48 +626,79 @@
     </div>
     
     <script>
-        // Initialize Chart
+        // Initialize Chart (defensive)
         document.addEventListener('DOMContentLoaded', function() {
-            const ctx = document.getElementById('equipmentChart').getContext('2d');
-            
-            // Get equipment data from PHP
-            const equipmentData = @json($stats['equipmentByType'] ?? []);
-            
-            const labels = Object.keys(equipmentData);
-            const data = Object.values(equipmentData);
-            
-            const backgroundColors = [
-                'rgba(79, 70, 229, 0.7)',
-                'rgba(124, 58, 237, 0.7)',
-                'rgba(59, 130, 246, 0.7)',
-                'rgba(16, 185, 129, 0.7)',
-                'rgba(245, 158, 11, 0.7)',
-                'rgba(239, 68, 68, 0.7)',
-                'rgba(139, 92, 246, 0.7)',
-                'rgba(6, 182, 212, 0.7)'
-            ];
-            
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: backgroundColors.slice(0, labels.length),
-                        borderColor: backgroundColors.slice(0, labels.length),
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
+            try {
+                const canvas = document.getElementById('equipmentChart');
+                if (!canvas) return;
+
+                const ctx = canvas.getContext && canvas.getContext('2d');
+                if (!ctx) return;
+
+                // Get equipment data from PHP
+                const equipmentData = @json($stats['equipmentByType'] ?? []);
+
+                let labels = [];
+                let data = [];
+
+                if (Array.isArray(equipmentData)) {
+                    data = equipmentData.slice();
+                    labels = data.map((_, i) => 'Type ' + (i + 1));
+                } else if (equipmentData && typeof equipmentData === 'object') {
+                    labels = Object.keys(equipmentData);
+                    data = Object.values(equipmentData);
+                }
+
+                if (!labels.length || !data.length) {
+                    // No data: hide canvas and show placeholder
+                    canvas.style.display = 'none';
+                    const parent = canvas.parentElement;
+                    if (parent) {
+                        const p = document.createElement('p');
+                        p.className = 'text-center text-muted';
+                        p.style.padding = '20px 0';
+                        p.textContent = "Pas de données d'équipement disponibles";
+                        parent.appendChild(p);
+                    }
+                    return;
+                }
+
+                const backgroundColors = [
+                    'rgba(79, 70, 229, 0.7)',
+                    'rgba(124, 58, 237, 0.7)',
+                    'rgba(59, 130, 246, 0.7)',
+                    'rgba(16, 185, 129, 0.7)',
+                    'rgba(245, 158, 11, 0.7)',
+                    'rgba(239, 68, 68, 0.7)',
+                    'rgba(139, 92, 246, 0.7)',
+                    'rgba(6, 182, 212, 0.7)'
+                ];
+
+                new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: backgroundColors.slice(0, labels.length),
+                            borderColor: backgroundColors.slice(0, labels.length),
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                            }
                         }
                     }
-                }
-            });
+                });
+            } catch (err) {
+                // Don't break the page if Chart.js fails
+                console.error('Equipment chart error:', err);
+            }
         });
     </script>
 </body>

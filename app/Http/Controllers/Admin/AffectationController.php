@@ -12,9 +12,7 @@ class AffectationController extends Controller
 {
     public function index()
     {
-        $affectations = Affectation::with(['equipement', 'user'])
-            ->latest()
-            ->paginate(10);
+        $affectations = Affectation::with(['equipement', 'user'])->latest()->paginate(10);
         return view('admin.affectations.index', compact('affectations'));
     }
     
@@ -24,8 +22,7 @@ class AffectationController extends Controller
             $query->whereNull('date_retour');
         })->get();
         
-        $users = User::where('role', '!=', 'admin')->get();
-        
+        $users = User::all();
         return view('admin.affectations.create', compact('equipements', 'users'));
     }
     
@@ -35,7 +32,8 @@ class AffectationController extends Controller
             'equipement_id' => 'required|exists:equipements,id',
             'user_id' => 'required|exists:users,id',
             'date_affectation' => 'required|date',
-            'raison' => 'nullable|string'
+            'date_retour' => 'nullable|date|after:date_affectation',
+            'raison' => 'nullable|string',
         ]);
         
         Affectation::create($request->all());
@@ -44,11 +42,16 @@ class AffectationController extends Controller
             ->with('success', 'Affectation créée avec succès.');
     }
     
+    public function show(Affectation $affectation)
+    {
+        $affectation->load(['equipement', 'user']);
+        return view('admin.affectations.show', compact('affectation'));
+    }
+    
     public function edit(Affectation $affectation)
     {
         $equipements = Equipement::all();
-        $users = User::where('role', '!=', 'admin')->get();
-        
+        $users = User::all();
         return view('admin.affectations.edit', compact('affectation', 'equipements', 'users'));
     }
     
@@ -58,8 +61,8 @@ class AffectationController extends Controller
             'equipement_id' => 'required|exists:equipements,id',
             'user_id' => 'required|exists:users,id',
             'date_affectation' => 'required|date',
-            'date_retour' => 'nullable|date',
-            'raison' => 'nullable|string'
+            'date_retour' => 'nullable|date|after:date_affectation',
+            'raison' => 'nullable|string',
         ]);
         
         $affectation->update($request->all());

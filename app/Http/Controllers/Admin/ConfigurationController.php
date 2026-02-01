@@ -22,19 +22,18 @@ class ConfigurationController extends Controller
     
     public function update(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'organization_name' => 'required|string|max:255',
             'contact_email' => 'required|email',
             'email_notifications' => 'required|boolean',
-            'auto_report' => 'required|in:daily,weekly,monthly,none'
+            'auto_report' => 'required|in:daily,weekly,monthly,none',
         ]);
-        
-        // Store in cache for now
-        Cache::forever('email_notifications', $request->email_notifications);
-        Cache::forever('auto_report', $request->auto_report);
-        
-        // You could also store in database or .env file
-        
+
+        // Save configuration to cache (i can save to database or .env file if needed)
+        foreach ($validated as $key => $value) {
+            Cache::forever($key, $value);
+        }
+                
         return redirect()->route('admin.configuration.index')
             ->with('success', 'Configuration mise à jour avec succès.');
     }

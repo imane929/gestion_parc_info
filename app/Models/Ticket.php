@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Ticket extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'titre',
         'description',
@@ -25,41 +27,83 @@ class Ticket extends Model
         'date_cloture' => 'datetime',
     ];
 
-    public function equipement(): BelongsTo
+    // Relationship with equipment
+    public function equipement()
     {
         return $this->belongsTo(Equipement::class);
     }
 
-    public function technicien(): BelongsTo
+    // Relationship with technician
+    public function technicien()
     {
         return $this->belongsTo(User::class, 'technicien_id');
     }
 
-    public function createur(): BelongsTo
+    // Relationship with creator
+    public function createur()
     {
         return $this->belongsTo(User::class, 'createur_id');
     }
 
-    // Helper methods
-    public function getPriorityColorAttribute(): string
+    // Scope for open tickets
+    public function scopeOuvert($query)
     {
-        return match($this->priorite) {
-            'urgente' => 'danger',
-            'haute' => 'warning',
-            'moyenne' => 'info',
-            'faible' => 'success',
-            default => 'secondary'
-        };
+        return $query->where('statut', 'ouvert');
     }
 
-    public function getStatusColorAttribute(): string
+    // Scope for in-progress tickets
+    public function scopeEnCours($query)
     {
-        return match($this->statut) {
-            'ouvert' => 'danger',
-            'en_cours' => 'warning',
-            'termine' => 'success',
-            'annule' => 'secondary',
-            default => 'info'
-        };
+        return $query->where('statut', 'en_cours');
+    }
+
+    // Scope for completed tickets
+    public function scopeTermine($query)
+    {
+        return $query->where('statut', 'termine');
+    }
+
+    // Get priority label
+    public function getPrioriteLabelAttribute()
+    {
+        $labels = [
+            'faible' => 'Faible',
+            'moyenne' => 'Moyenne',
+            'haute' => 'Haute',
+            'urgente' => 'Urgente',
+        ];
+
+        return $labels[$this->priorite] ?? $this->priorite;
+    }
+
+    // Get status label
+    public function getStatutLabelAttribute()
+    {
+        $labels = [
+            'ouvert' => 'Ouvert',
+            'en_cours' => 'En cours',
+            'termine' => 'Terminé',
+            'annule' => 'Annulé',
+        ];
+
+        return $labels[$this->statut] ?? $this->statut;
+    }
+
+    // Check if ticket is open
+    public function getIsOuvertAttribute()
+    {
+        return $this->statut === 'ouvert';
+    }
+
+    // Check if ticket is in progress
+    public function getIsEnCoursAttribute()
+    {
+        return $this->statut === 'en_cours';
+    }
+
+    // Check if ticket is completed
+    public function getIsTermineAttribute()
+    {
+        return $this->statut === 'termine';
     }
 }

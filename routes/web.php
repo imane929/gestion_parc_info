@@ -10,8 +10,9 @@ use App\Http\Controllers\Admin\AffectationController;
 use App\Http\Controllers\Admin\TicketController;
 use App\Http\Controllers\Admin\RapportController;
 use App\Http\Controllers\Admin\ConfigurationController;
+use App\Http\Controllers\Admin\HistoriqueController;
+use App\Http\Controllers\Admin\ApprovisionnementController;
 use Illuminate\Support\Facades\Route;
-
 
 Route::get('/', function () {
     return view('welcome');
@@ -36,7 +37,7 @@ Route::middleware('auth', 'verified')->group(function () {
     })->name('dashboard');
     
     // Regular user dashboard
-    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/user/dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
     
     // Admin routes
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -54,10 +55,8 @@ Route::middleware('auth', 'verified')->group(function () {
         Route::resource('affectations', AffectationController::class);
         Route::resource('tickets', TicketController::class);
         
-        // Other pages
-        Route::get('/historique', function () {
-            return view('admin.historique');
-        })->name('historique');
+        // Other pages - FIXED: Using Controller methods
+        Route::get('/historique', [HistoriqueController::class, 'index'])->name('historique');
         
         Route::get('/rapports', [RapportController::class, 'index'])->name('rapports.index');
         Route::post('/rapports/generate', [RapportController::class, 'generate'])->name('rapports.generate');
@@ -65,9 +64,7 @@ Route::middleware('auth', 'verified')->group(function () {
         Route::get('/configuration', [ConfigurationController::class, 'index'])->name('configuration.index');
         Route::post('/configuration/update', [ConfigurationController::class, 'update'])->name('configuration.update');
         
-        Route::get('/approvisionnement', function () {
-            return view('admin.approvisionnement');
-        })->name('approvisionnement');
+        Route::get('/approvisionnement', [ApprovisionnementController::class, 'index'])->name('approvisionnement');
     });
 
     // Technician routes
@@ -91,7 +88,7 @@ Route::middleware(['auth:sanctum'])->prefix('api/admin')->group(function () {
     Route::delete('/equipements/{equipement}', [EquipementController::class, 'apiDestroy']);
 });
 
-// Fallback route for testing
+// Test route
 Route::get('/test', function () {
     return 'Test route working';
 });

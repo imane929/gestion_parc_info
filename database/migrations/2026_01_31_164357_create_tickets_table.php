@@ -16,11 +16,15 @@ return new class extends Migration
             $table->enum('statut', ['ouvert', 'en_cours', 'termine', 'annule'])->default('ouvert');
             $table->foreignId('equipement_id')->constrained()->onDelete('cascade');
             $table->foreignId('technicien_id')->nullable()->constrained('users')->onDelete('set null');
-            $table->foreignId('createur_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('createur_id')->nullable()->constrained('users')->onDelete('set null');
             $table->timestamp('date_ouverture')->useCurrent();
             $table->timestamp('date_cloture')->nullable();
             $table->text('solution')->nullable();
             $table->timestamps();
+
+            // Indexes for faster queries
+            $table->index('statut');
+            $table->index('priorite');
         });
     }
 

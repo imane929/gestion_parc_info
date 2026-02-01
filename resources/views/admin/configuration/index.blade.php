@@ -18,19 +18,19 @@
                             <label for="organization_name" class="form-label">Nom de l'organisation</label>
                             <input type="text" class="form-control" 
                                    id="organization_name" name="organization_name" 
-                                   value="{{ old('organization_name', $config['organization_name'] ?? 'Gestion Parc Informatique') }}">
+                                   value="{{ old('organization_name', $config['organization_name'] ?? 'Gestion Parc Informatique') }}" required>
                         </div>
                         
                         <div class="mb-3">
                             <label for="contact_email" class="form-label">Email de contact</label>
                             <input type="email" class="form-control" 
                                    id="contact_email" name="contact_email" 
-                                   value="{{ old('contact_email', $config['contact_email'] ?? 'contact@parc-info.com') }}">
+                                   value="{{ old('contact_email', $config['contact_email'] ?? 'contact@parc-info.com') }}" required>
                         </div>
                         
                         <div class="mb-3">
                             <label for="email_notifications" class="form-label">Notifications par email</label>
-                            <select class="form-control" id="email_notifications" name="email_notifications">
+                            <select class="form-select" id="email_notifications" name="email_notifications" required>
                                 <option value="1" {{ (old('email_notifications', $config['email_notifications'] ?? true) ? 'selected' : '') }}>Activées</option>
                                 <option value="0" {{ (!old('email_notifications', $config['email_notifications'] ?? true) ? 'selected' : '') }}>Désactivées</option>
                             </select>
@@ -38,9 +38,9 @@
                         
                         <div class="mb-4">
                             <label for="auto_report" class="form-label">Rapport automatique</label>
-                            <select class="form-control" id="auto_report" name="auto_report">
+                            <select class="form-select" id="auto_report" name="auto_report" required>
                                 <option value="daily" {{ (old('auto_report', $config['auto_report'] ?? 'weekly') == 'daily' ? 'selected' : '') }}>Quotidien</option>
-                                <option value="weekly" {{ (old('auto_report', $config['auto_report'] ?? 'weekly') == 'weekly' ? 'selected' : '') }} selected>Hebdomadaire</option>
+                                <option value="weekly" {{ (old('auto_report', $config['auto_report'] ?? 'weekly') == 'weekly' ? 'selected' : '') }}>Hebdomadaire</option>
                                 <option value="monthly" {{ (old('auto_report', $config['auto_report'] ?? 'weekly') == 'monthly' ? 'selected' : '') }}>Mensuel</option>
                                 <option value="none" {{ (old('auto_report', $config['auto_report'] ?? 'weekly') == 'none' ? 'selected' : '') }}>Aucun</option>
                             </select>
