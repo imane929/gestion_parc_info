@@ -22,7 +22,7 @@
                                     <option value="">Sélectionner un équipement</option>
                                     @foreach($equipements as $equipement)
                                     <option value="{{ $equipement->id }}" {{ old('equipement_id') == $equipement->id ? 'selected' : '' }}>
-                                        {{ $equipement->nom }} ({{ $equipement->type }})
+                                        {{ $equipement->nom }} ({{ $equipement->type }}) - {{ $equipement->localisation }}
                                     </option>
                                     @endforeach
                                 </select>
@@ -38,7 +38,7 @@
                                     <option value="">Sélectionner un utilisateur</option>
                                     @foreach($users as $user)
                                     <option value="{{ $user->id }}" {{ old('user_id') == $user->id ? 'selected' : '' }}>
-                                        {{ $user->name }} ({{ $user->role }})
+                                        {{ $user->name }} ({{ ucfirst($user->role) }})
                                     </option>
                                     @endforeach
                                 </select>
@@ -60,9 +60,24 @@
                             </div>
                             
                             <div class="col-md-6 mb-3">
-                                <label for="date_retour" class="form-label">Date de retour prévue (optionnel)</label>
+                                <label for="statut" class="form-label">Statut *</label>
+                                <select class="form-control @error('statut') is-invalid @enderror" 
+                                        id="statut" name="statut" required>
+                                    <option value="actif" {{ old('statut', 'actif') == 'actif' ? 'selected' : '' }}>Actif</option>
+                                    <option value="retourné" {{ old('statut') == 'retourné' ? 'selected' : '' }}>Retourné</option>
+                                </select>
+                                @error('statut')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="date_retour" class="form-label">Date de retour (si retourné)</label>
                                 <input type="date" class="form-control @error('date_retour') is-invalid @enderror" 
-                                       id="date_retour" name="date_retour" value="{{ old('date_retour') }}">
+                                       id="date_retour" name="date_retour" 
+                                       value="{{ old('date_retour') }}">
                                 @error('date_retour')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -72,7 +87,8 @@
                         <div class="mb-4">
                             <label for="raison" class="form-label">Raison de l'affectation</label>
                             <textarea class="form-control @error('raison') is-invalid @enderror" 
-                                      id="raison" name="raison" rows="3">{{ old('raison') }}</textarea>
+                                      id="raison" name="raison" rows="3" 
+                                      placeholder="Décrivez la raison de cette affectation...">{{ old('raison') }}</textarea>
                             @error('raison')
                             <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -92,4 +108,30 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statutSelect = document.getElementById('statut');
+        const dateRetourInput = document.getElementById('date_retour');
+        
+        function toggleDateRetour() {
+            if (statutSelect.value === 'retourné') {
+                dateRetourInput.required = true;
+                // Set default date to today if empty
+                if (!dateRetourInput.value) {
+                    const today = new Date().toISOString().split('T')[0];
+                    dateRetourInput.value = today;
+                }
+            } else {
+                dateRetourInput.required = false;
+                dateRetourInput.value = '';
+            }
+        }
+        
+        statutSelect.addEventListener('change', toggleDateRetour);
+        
+        // Initialize on page load
+        toggleDateRetour();
+    });
+</script>
 @endsection

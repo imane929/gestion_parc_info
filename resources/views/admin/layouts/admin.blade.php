@@ -857,6 +857,47 @@
                 button.innerHTML = button.getAttribute('data-original-text');
             }
         }
+
+        // Listen for form submissions and log activities
+        document.addEventListener('DOMContentLoaded', function() {
+            // Log user creation
+            const userForms = document.querySelectorAll('form[action*="users"]');
+            userForms.forEach(form => {
+                form.addEventListener('submit', function() {
+                    logActivity('user', 'création', 'Nouvel utilisateur créé');
+                });
+            });
+
+            // Log equipment creation
+            const equipmentForms = document.querySelectorAll('form[action*="equipements"]');
+            equipmentForms.forEach(form => {
+                form.addEventListener('submit', function() {
+                    logActivity('equipement', 'ajout', 'Nouvel équipement ajouté');
+                });
+            });
+
+            // Log configuration changes
+            const configForm = document.querySelector('form[action*="configuration"]');
+            if (configForm) {
+                configForm.addEventListener('submit', function() {
+                    logActivity('system', 'configuration', 'Configuration mise à jour');
+                });
+            }
+        });
+
+        function logActivity(type, action, description) {
+            // Store activity in localStorage
+            const activities = JSON.parse(localStorage.getItem('system_activities') || '[]');
+            activities.push({
+                id: Date.now(),
+                type: type,
+                action: action,
+                description: description,
+                timestamp: new Date().toISOString(),
+                user: "{{ auth()->user()->name }}"
+            });
+            localStorage.setItem('system_activities', JSON.stringify(activities));
+        }
     </script>
     
     @stack('scripts')

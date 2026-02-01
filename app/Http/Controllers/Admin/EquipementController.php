@@ -31,10 +31,28 @@ class EquipementController extends Controller
             'localisation' => 'required|string'
         ]);
         
-        Equipement::create($request->all());
-        
-        return redirect()->route('admin.equipements.index')
-            ->with('success', 'Équipement ajouté avec succès.');
+        try {
+            // Use create method
+            $equipement = Equipement::create([
+                'nom' => $request->nom,
+                'type' => $request->type,
+                'marque' => $request->marque,
+                'modele' => $request->modele,
+                'numero_serie' => $request->numero_serie,
+                'date_acquisition' => $request->date_acquisition,
+                'etat' => $request->etat,
+                'localisation' => $request->localisation,
+                'notes' => $request->notes,
+            ]);
+
+            return redirect()->route('admin.equipements.index')
+                ->with('success', 'Équipement ajouté avec succès.');
+                
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Erreur lors de la création: ' . $e->getMessage());
+        }
     }
     
     public function show(Equipement $equipement)

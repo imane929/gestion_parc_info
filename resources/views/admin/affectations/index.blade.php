@@ -34,26 +34,57 @@
                         @forelse($affectations as $affectation)
                         <tr>
                             <td>#{{ $affectation->id }}</td>
-                            <td>{{ $affectation->equipement->nom ?? 'N/A' }}</td>
-                            <td>{{ $affectation->user->name ?? 'N/A' }}</td>
-                            <td>{{ $affectation->date_affectation->format('d/m/Y') }}</td>
-                            <td>{{ $affectation->date_retour ? $affectation->date_retour->format('d/m/Y') : '-' }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <i class="fas fa-desktop text-primary me-2"></i>
+                                    <div>
+                                        <strong>{{ $affectation->equipement->nom ?? 'N/A' }}</strong>
+                                        <div class="text-muted small">{{ $affectation->equipement->type ?? '' }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm bg-primary text-white d-flex align-items-center justify-content-center rounded-circle me-2">
+                                        {{ strtoupper(substr($affectation->user->name ?? 'U', 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <strong>{{ $affectation->user->name ?? 'N/A' }}</strong>
+                                        <div class="text-muted small">{{ $affectation->user->email ?? '' }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>{{ \Carbon\Carbon::parse($affectation->date_affectation)->format('d/m/Y') }}</td>
                             <td>
                                 @if($affectation->date_retour)
-                                <span class="badge bg-secondary">Retourné</span>
+                                    {{ \Carbon\Carbon::parse($affectation->date_retour)->format('d/m/Y') }}
                                 @else
-                                <span class="badge bg-success">Actif</span>
+                                    <span class="text-muted">-</span>
+                                @endif
+                            </td>
+                            <td>
+                                @if($affectation->statut === 'retourné')
+                                    <span class="badge bg-secondary">Retourné</span>
+                                @elseif(\Carbon\Carbon::parse($affectation->date_affectation)->diffInDays(now()) > 30)
+                                    <span class="badge bg-warning">Ancienne</span>
+                                @else
+                                    <span class="badge bg-success">Actif</span>
                                 @endif
                             </td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('admin.affectations.edit', $affectation) }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ route('admin.affectations.show', $affectation) }}" class="btn btn-sm btn-outline-info" title="Voir détails">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('admin.affectations.edit', $affectation) }}" class="btn btn-sm btn-outline-primary" title="Modifier">
                                         <i class="fas fa-edit"></i>
                                     </a>
                                     <form action="{{ route('admin.affectations.destroy', $affectation) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Êtes-vous sûr ?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette affectation ?')" 
+                                                title="Supprimer">
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </form>
@@ -63,7 +94,11 @@
                         @empty
                         <tr>
                             <td colspan="7" class="text-center text-muted py-4">
-                                Aucune affectation trouvée
+                                <i class="fas fa-inbox fa-2x mb-3"></i>
+                                <p>Aucune affectation trouvée</p>
+                                <a href="{{ route('admin.affectations.create') }}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus me-1"></i>Créer une affectation
+                                </a>
                             </td>
                         </tr>
                         @endforelse
@@ -79,4 +114,13 @@
         </div>
     </div>
 </div>
+
+<style>
+    .avatar-sm {
+        width: 32px;
+        height: 32px;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+</style>
 @endsection

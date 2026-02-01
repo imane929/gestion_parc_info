@@ -14,6 +14,7 @@ return new class extends Migration
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->date('date_affectation');
             $table->date('date_retour')->nullable();
+            $table->string('statut')->default('actif');
             $table->text('raison')->nullable();
             $table->timestamps();
             

@@ -7,19 +7,24 @@ use App\Models\Affectation;
 use App\Models\Equipement;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class AffectationController extends Controller
 {
     public function index()
     {
-        $affectations = Affectation::with(['equipement', 'user'])->latest()->paginate(10);
+        $affectations = Affectation::with(['equipement', 'user'])
+            ->latest()
+            ->paginate(10);
+
         return view('admin.affectations.index', compact('affectations'));
     }
     
     public function create()
     {
+        // Get equipements that are not currently assigned (no active affectation)
         $equipements = Equipement::whereDoesntHave('affectations', function($query) {
-            $query->whereNull('date_retour');
+            $query->where('statut', 'actif');
         })->get();
         
         $users = User::all();
@@ -32,11 +37,23 @@ class AffectationController extends Controller
             'equipement_id' => 'required|exists:equipements,id',
             'user_id' => 'required|exists:users,id',
             'date_affectation' => 'required|date',
-            'date_retour' => 'nullable|date|after:date_affectation',
-            'raison' => 'nullable|string',
+            'date_retour' => 'nullable|date|after_or_equal:date_affectation',
+            'statut' => 'required|in:actif,retourné',
+            'raison' => 'nullable|string|max:500',
         ]);
+
+        // If status is "retourné" but no date_retour is set, set it to today
+        $data = $request->all();
+        if ($data['statut'] === 'retourné' && empty($data['date_retour'])) {
+            $data['date_retour'] = Carbon::now()->format('Y-m-d');
+        }
         
-        Affectation::create($request->all());
+        // If status is "actif", ensure date_retour is null
+        if ($data['statut'] === 'actif') {
+            $data['date_retour'] = null;
+        }
+
+        Affectation::create($data);
         
         return redirect()->route('admin.affectations.index')
             ->with('success', 'Affectation créée avec succès.');
@@ -61,11 +78,23 @@ class AffectationController extends Controller
             'equipement_id' => 'required|exists:equipements,id',
             'user_id' => 'required|exists:users,id',
             'date_affectation' => 'required|date',
-            'date_retour' => 'nullable|date|after:date_affectation',
-            'raison' => 'nullable|string',
+            'date_retour' => 'nullable|date|after_or_equal:date_affectation',
+            'statut' => 'required|in:actif,retourné',
+            'raison' => 'nullable|string|max:500',
         ]);
+
+        $data = $request->all();
         
-        $affectation->update($request->all());
+        // Handle status and date_retour logic
+        if ($data['statut'] === 'retourné' && empty($data['date_retour'])) {
+            $data['date_retour'] = Carbon::now()->format('Y-m-d');
+        }
+        
+        if ($data['statut'] === 'actif') {
+            $data['date_retour'] = null;
+        }
+
+        $affectation->update($data);
         
         return redirect()->route('admin.affectations.index')
             ->with('success', 'Affectation mise à jour avec succès.');

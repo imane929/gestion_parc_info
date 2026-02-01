@@ -46,4 +46,21 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function equipements()
+    {
+        return $this->hasMany(Equipement::class);
+    }
+
+    // Add relationship for affectations
+    public function affectations()
+    {
+        return $this->hasMany(Affectation::class);
+    }
+
+    // Add relationship for tickets (as technicien)
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class, 'technicien_id');
+    }
 }

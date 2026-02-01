@@ -23,7 +23,7 @@
                                     <option value="">Sélectionner un équipement</option>
                                     @foreach($equipements as $equipement)
                                     <option value="{{ $equipement->id }}" {{ old('equipement_id', $affectation->equipement_id) == $equipement->id ? 'selected' : '' }}>
-                                        {{ $equipement->nom }} ({{ $equipement->type }})
+                                        {{ $equipement->nom }} ({{ $equipement->type }}) - {{ $equipement->localisation }}
                                     </option>
                                     @endforeach
                                 </select>
@@ -39,7 +39,7 @@
                                     <option value="">Sélectionner un utilisateur</option>
                                     @foreach($users as $user)
                                     <option value="{{ $user->id }}" {{ old('user_id', $affectation->user_id) == $user->id ? 'selected' : '' }}>
-                                        {{ $user->name }} ({{ $user->role }})
+                                        {{ $user->name }} ({{ ucfirst($user->role) }})
                                     </option>
                                     @endforeach
                                 </select>
@@ -54,17 +54,31 @@
                                 <label for="date_affectation" class="form-label">Date d'affectation *</label>
                                 <input type="date" class="form-control @error('date_affectation') is-invalid @enderror" 
                                        id="date_affectation" name="date_affectation" 
-                                       value="{{ old('date_affectation', $affectation->date_affectation ? $affectation->date_affectation->format('Y-m-d') : date('Y-m-d')) }}" required>
+                                       value="{{ \Carbon\Carbon::parse($affectation->date_affectation)->format('Y-m-d') }}" required>
                                 @error('date_affectation')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
                             </div>
                             
                             <div class="col-md-6 mb-3">
-                                <label for="date_retour" class="form-label">Date de retour</label>
+                                <label for="statut" class="form-label">Statut *</label>
+                                <select class="form-control @error('statut') is-invalid @enderror" 
+                                        id="statut" name="statut" required>
+                                    <option value="actif" {{ old('statut', $affectation->statut) == 'actif' ? 'selected' : '' }}>Actif</option>
+                                    <option value="retourné" {{ old('statut', $affectation->statut) == 'retourné' ? 'selected' : '' }}>Retourné</option>
+                                </select>
+                                @error('statut')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="date_retour" class="form-label">Date de retour (si retourné)</label>
                                 <input type="date" class="form-control @error('date_retour') is-invalid @enderror" 
                                        id="date_retour" name="date_retour" 
-                                       value="{{ old('date_retour', $affectation->date_retour ? $affectation->date_retour->format('Y-m-d') : '') }}">
+                                       value="{{ $affectation->date_retour ? \Carbon\Carbon::parse($affectation->date_retour)->format('Y-m-d') : '' }}">
                                 @error('date_retour')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -77,7 +91,7 @@
                                       id="raison" name="raison" rows="3">{{ old('raison', $affectation->raison) }}</textarea>
                             @error('raison')
                             <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                                @enderror
                         </div>
                         
                         <div class="d-flex justify-content-between">
@@ -94,4 +108,32 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const statutSelect = document.getElementById('statut');
+        const dateRetourInput = document.getElementById('date_retour');
+        
+        function toggleDateRetour() {
+            if (statutSelect.value === 'retourné') {
+                dateRetourInput.required = true;
+                // Set default date to today if empty
+                if (!dateRetourInput.value) {
+                    const today = new Date().toISOString().split('T')[0];
+                    dateRetourInput.value = today;
+                }
+            } else {
+                dateRetourInput.required = false;
+                if (!dateRetourInput.value) {
+                    dateRetourInput.value = '';
+                }
+            }
+        }
+        
+        statutSelect.addEventListener('change', toggleDateRetour);
+        
+        // Initialize on page load
+        toggleDateRetour();
+    });
+</script>
 @endsection

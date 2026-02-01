@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Equipement extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'nom',
         'type',
@@ -25,19 +28,32 @@ class Equipement extends Model
         'date_acquisition' => 'date',
     ];
 
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
 
-    public function tickets(): HasMany
+    public function tickets()
     {
         return $this->hasMany(Ticket::class);
     }
 
-    public function affectations(): HasMany
+    public function affectations()
     {
         return $this->hasMany(Affectation::class);
+    }
+
+    // Get current user assignment
+    public function currentAffectation()
+    {
+        return $this->affectations()->whereNull('date_retour')->first();
+    }
+
+    // Get current assigned user
+    public function currentUser()
+    {
+        $affectation = $this->currentAffectation();
+        return $affectation ? $affectation->user : null;
     }
 
     // Helper methods
