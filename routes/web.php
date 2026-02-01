@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\RapportController;
 use App\Http\Controllers\Admin\ConfigurationController;
 use App\Http\Controllers\Admin\HistoriqueController;
 use App\Http\Controllers\Admin\ApprovisionnementController;
+use App\Http\Controllers\UserDashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -36,8 +37,14 @@ Route::middleware('auth', 'verified')->group(function () {
         }
     })->name('dashboard');
     
-    // Regular user dashboard
-    Route::get('/user/dashboard', [DashboardController::class, 'index'])->name('user.dashboard');
+    // User routes
+    Route::middleware(['role:utilisateur'])->prefix('user')->name('user.')->group(function () {
+        Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+        Route::get('/tickets', [UserDashboardController::class, 'tickets'])->name('tickets');
+        Route::get('/tickets/create', [UserDashboardController::class, 'createTicket'])->name('tickets.create');
+        Route::post('/tickets', [UserDashboardController::class, 'storeTicket'])->name('tickets.store');
+        Route::get('/equipements', [UserDashboardController::class, 'equipements'])->name('equipements');
+    });
     
     // Admin routes
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -67,11 +74,30 @@ Route::middleware('auth', 'verified')->group(function () {
         Route::get('/approvisionnement', [ApprovisionnementController::class, 'index'])->name('approvisionnement');
     });
 
-    // Technician routes
+    // Technicien routes
     Route::middleware(['role:technicien'])->prefix('technicien')->name('technicien.')->group(function () {
-        Route::get('/dashboard', function () {
-            return view('dashboard.technicien');
-        })->name('dashboard');
+        // Dashboard
+        Route::get('/dashboard', [TechnicienDashboardController::class, 'index'])->name('dashboard');
+        
+        // Tickets
+        Route::get('/tickets', [TechnicienDashboardController::class, 'tickets'])->name('tickets');
+        Route::get('/tickets/create', [TechnicienDashboardController::class, 'createTicket'])->name('tickets.create');
+        Route::post('/tickets', [TechnicienDashboardController::class, 'storeTicket'])->name('tickets.store');
+        Route::get('/tickets/{ticket}', [TechnicienDashboardController::class, 'showTicket'])->name('tickets.show');
+        Route::post('/tickets/{ticket}/start', [TechnicienDashboardController::class, 'startTicket'])->name('tickets.start');
+        Route::post('/tickets/{ticket}/complete', [TechnicienDashboardController::class, 'completeTicket'])->name('tickets.complete');
+        
+        // Interventions
+        Route::get('/interventions', [TechnicienDashboardController::class, 'interventions'])->name('interventions');
+        
+        // Equipment
+        Route::get('/equipements', [TechnicienDashboardController::class, 'equipements'])->name('equipements');
+        
+        // History
+        Route::get('/historique', [TechnicienDashboardController::class, 'historique'])->name('historique');
+        
+        // Reports
+        Route::get('/rapports', [TechnicienDashboardController::class, 'rapports'])->name('rapports');
     });
 });
 
