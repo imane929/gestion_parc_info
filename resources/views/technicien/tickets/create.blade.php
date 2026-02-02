@@ -9,7 +9,7 @@
             <h1 class="h2 mb-1">Créer un Nouveau Ticket</h1>
             <p class="text-muted mb-0">Signalez un problème ou une demande de maintenance</p>
         </div>
-        <a href="{{ route('technicien.tickets.index') }}" class="btn btn-secondary">
+        <a href="{{ route('technicien.tickets') }}" class="btn btn-secondary">
             <i class="fas fa-arrow-left me-2"></i> Retour
         </a>
     </div>
@@ -98,7 +98,7 @@
                 </div>
                 
                 <div class="d-flex justify-content-between mt-4">
-                    <a href="{{ route('technicien.tickets.index') }}" class="btn btn-secondary">
+                    <a href="{{ route('technicien.tickets') }}" class="btn btn-secondary">
                         <i class="fas fa-times me-2"></i> Annuler
                     </a>
                     <button type="submit" class="btn btn-primary">

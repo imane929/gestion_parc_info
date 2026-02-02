@@ -340,24 +340,7 @@
                         <i class="fas fa-sign-in-alt"></i>Se connecter
                     </button>
                 </form>
-                
-                <!-- Demo Credentials -->
-                <div class="demo-credentials">
-                    <h4><i class="fas fa-key"></i> Accès de démonstration</h4>
-                    <div class="credential-item">
-                        <span class="credential-role">Administrateur :</span>
-                        <span class="credential-details">admin@parc.com / password</span>
-                    </div>
-                    <div class="credential-item">
-                        <span class="credential-role">Technicien :</span>
-                        <span class="credential-details">tech@parc.com / password</span>
-                    </div>
-                    <div class="credential-item">
-                        <span class="credential-role">Utilisateur :</span>
-                        <span class="credential-details">user@parc.com / password</span>
-                    </div>
-                </div>
-                
+                                
                 <!-- Register Link -->
                 <div class="mt-8 text-center">
                     <p class="text-gray-600">
