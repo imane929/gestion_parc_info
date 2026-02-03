@@ -170,7 +170,8 @@ class TechnicienDashboardController extends Controller
                 ->where('statut', 'termine')
                 ->whereMonth('date_fin', $month)
                 ->whereYear('date_fin', $year)
-                ->avg('temps_intervention') ?? 0,
+                ->selectRaw('AVG(TIMESTAMPDIFF(MINUTE, date_debut, date_fin)) as temps_moyen')
+                ->value('temps_moyen'),
         ];
         
         return view('technicien.rapports.index', compact('stats'));

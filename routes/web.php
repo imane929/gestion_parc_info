@@ -80,8 +80,6 @@ Route::middleware('auth', 'verified')->group(function () {
         Route::get('/dashboard', [TechnicienDashboardController::class, 'index'])->name('dashboard');
         
         // Tickets
-        Route::get('/tickets', [TicketController::class, 'index'])
-            ->name('tickets.index');
         Route::get('/tickets', [TechnicienDashboardController::class, 'tickets'])->name('tickets');
         Route::get('/tickets/create', [TechnicienDashboardController::class, 'createTicket'])->name('tickets.create');
         Route::post('/tickets', [TechnicienDashboardController::class, 'storeTicket'])->name('tickets.store');

@@ -24,20 +24,20 @@ class UserDashboardController extends Controller
         $equipements = $affectations->pluck('equipement');
         
         // Get user's tickets
-        $tickets = Ticket::where('user_id', $user->id)
+        $tickets = Ticket::where('createur_id', $user->id)
             ->with('equipement')
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
-        
+                    
         // Stats
         $stats = [
             'equipementsCount' => $equipements->count(),
-            'ticketsCount' => Ticket::where('user_id', $user->id)->count(),
-            'resolvedTickets' => Ticket::where('user_id', $user->id)
+            'ticketsCount' => Ticket::where('createur_id', $user->id)->count(),
+            'resolvedTickets' => Ticket::where('createur_id', $user->id)
                 ->where('statut', 'termine')
                 ->count(),
-            'pendingTickets' => Ticket::where('user_id', $user->id)
+            'pendingTickets' => Ticket::where('createur_id', $user->id)
                 ->where('statut', '!=', 'termine')
                 ->count(),
         ];
@@ -48,7 +48,7 @@ class UserDashboardController extends Controller
     public function tickets()
     {
         $user = Auth::user();
-        $tickets = Ticket::where('user_id', $user->id)
+        $tickets = Ticket::where('createur_id', $user->id)
             ->with(['equipement', 'technicien'])
             ->orderBy('created_at', 'desc')
             ->paginate(20);
