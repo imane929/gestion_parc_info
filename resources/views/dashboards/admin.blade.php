@@ -99,21 +99,27 @@
                         @endforeach
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="rounded-3xl border border-white/70 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+        <!-- Top Locations - Full Width Below -->
+        <div class="rounded-3xl border border-white/70 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-950">
+            <div class="flex items-center justify-between">
+                <div>
                     <h2 class="text-lg font-bold text-slate-900 dark:text-white">Top locations</h2>
-                    <div class="mt-5 space-y-3">
-                        @foreach ($locations as $location)
-                            <div class="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-3 dark:border-slate-800">
-                                <div>
-                                    <p class="font-semibold text-slate-900 dark:text-white">{{ $location->nom_complet }}</p>
-                                    <p class="text-xs text-slate-500 dark:text-slate-400">{{ $location->site }}</p>
-                                </div>
-                                <span class="rounded-full bg-brand-50 px-3 py-1 text-xs font-bold text-brand-700 dark:bg-brand-950/70 dark:text-brand-300">{{ $location->actifs_count }} assets</span>
-                            </div>
-                        @endforeach
-                    </div>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Locations with most assets.</p>
                 </div>
+            </div>
+            <div class="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                @foreach ($locations as $location)
+                    <div class="flex items-center justify-between rounded-2xl border border-slate-200 px-4 py-4 dark:border-slate-800 hover:border-cyan-500 dark:hover:border-cyan-500 transition-colors">
+                        <div class="flex-1 min-w-0">
+                            <p class="font-semibold text-slate-900 dark:text-white truncate">{{ $location->nom_complet }}</p>
+                            <p class="text-xs text-slate-500 dark:text-slate-400">{{ $location->site }}</p>
+                        </div>
+                        <span class="ml-3 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 px-3 py-1 text-xs font-bold text-white shrink-0">{{ $location->actifs_count }} assets</span>
+                    </div>
+                @endforeach
             </div>
         </div>
     </div>
