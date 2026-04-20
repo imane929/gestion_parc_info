@@ -1,465 +1,314 @@
-@extends('layouts.admin-new')
+@extends('layouts.app')
 
 @section('title', 'Détails de l\'actif')
 @section('page-title', 'Détails de l\'actif')
 
 @section('content')
-<div class="row">
+<div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
     <!-- Main Info Card -->
-    <div class="col-lg-4 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h6 class="mb-0">Informations de l'actif</h6>
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700 dark:bg-slate-900 overflow-hidden">
+        <div class="px-6 py-4 border-b border-slate-200/60 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+            <h2 class="text-lg font-semibold text-slate-900 dark:text-white">Informations</h2>
+        </div>
+        
+        <div class="p-6">
+            <div class="text-center mb-6">
+                @php
+                $typeIcons = [
+                    'pc' => 'desktop_windows',
+                    'serveur' => 'dns',
+                    'imprimante' => 'print',
+                    'reseau' => 'router',
+                    'peripherique' => 'mouse',
+                    'mobile' => 'smartphone',
+                    'autre' => 'devices'
+                ];
+                $typeIcon = $typeIcons[$actif->type] ?? 'devices';
+                @endphp
+                <div class="w-24 h-24 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+                    <span class="material-symbols-outlined text-white text-4xl">{{ $typeIcon }}</span>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ $actif->marque }} {{ $actif->modele }}</h3>
+                <p class="text-slate-500 dark:text-slate-400">{{ $actif->code_inventaire }}</p>
             </div>
-            <div class="card-body">
-                <div class="text-center mb-4">
-                    @php
-                        $typeIcon = [
-                            'pc' => 'fa-desktop',
-                            'serveur' => 'fa-server',
-                            'imprimante' => 'fa-print',
-                            'reseau' => 'fa-network-wired',
-                            'peripherique' => 'fa-mouse',
-                            'mobile' => 'fa-mobile-alt',
-                            'autre' => 'fa-question-circle'
-                        ][$actif->type] ?? 'fa-desktop';
-                    @endphp
-                    <div class="mx-auto mb-3" style="width: 100px; height: 100px; background: linear-gradient(135deg, #3b7cff 0%, #2b4f9e 100%); color: white; font-size: 2.5rem; display: flex; align-items: center; justify-content: center; border-radius: 20px;">
-                        <i class="fas {{ $typeIcon }}"></i>
+            
+            <div class="space-y-3">
+                <div class="flex items-center justify-between py-3 border-b border-slate-200/60 dark:border-slate-700">
+                    <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined text-lg">category</span>
+                        <span>Type</span>
                     </div>
-                    <h4>{{ $actif->marque }} {{ $actif->modele }}</h4>
-                    <p class="text-muted">{{ $actif->code_inventaire }}</p>
+                    <span class="px-3 py-1 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 text-white text-xs font-medium">{{ ucfirst($actif->type) }}</span>
                 </div>
                 
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                        <span><i class="fas fa-tag me-2 text-primary"></i> Type</span>
-                        <span class="badge bg-primary">{{ ucfirst($actif->type) }}</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                        <span><i class="fas fa-barcode me-2 text-primary"></i> Numéro de série</span>
-                        <code>{{ $actif->numero_serie }}</code>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                        <span><i class="fas fa-calendar me-2 text-primary"></i> Date d'achat</span>
-                        <span>{{ $actif->date_achat ? $actif->date_achat->format('d/m/Y') : 'Non spécifié' }}</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                        <span><i class="fas fa-shield-alt me-2 text-primary"></i> Garantie</span>
-                        @if($actif->garantie_fin)
-                            <span class="{{ $actif->garantieEstValide() ? 'text-success' : 'text-danger' }}">
-                                {{ \Carbon\Carbon::parse($actif->garantie_fin)->format('d/m/Y') }}
-                                @if($actif->garantieEstValide())
-                                    <br><small>{{ $actif->jours_restants_garantie ?? \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($actif->garantie_fin)) }} jours restants</small>
-                                @endif
-                            </span>
-                        @else
-                            <span class="text-muted">Non spécifié</span>
-                        @endif
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                        <span><i class="fas fa-map-marker-alt me-2 text-primary"></i> Localisation</span>
-                        @if($actif->localisation)
-                            <span>{{ $actif->localisation->nom_complet }}</span>
-                        @else
-                            <span class="text-muted">Non défini</span>
-                        @endif
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                        <span><i class="fas fa-user me-2 text-primary"></i> Affecté à</span>
-                        @if($actif->utilisateurAffecte)
-                            <span>{{ $actif->utilisateurAffecte->full_name ?? $actif->utilisateurAffecte->name }}</span>
-                        @else
-                            <span class="text-muted">Non affecté</span>
-                        @endif
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between align-items-center px-0">
-                        <span><i class="fas fa-chart-line me-2 text-primary"></i> État</span>
-                        @php
-                            $etatClass = [
-                                'neuf' => 'badge bg-success',
-                                'bon' => 'badge bg-info',
-                                'moyen' => 'badge bg-warning',
-                                'mauvais' => 'badge bg-danger',
-                                'hors_service' => 'badge bg-dark'
-                            ][$actif->etat] ?? 'badge bg-secondary';
-                        @endphp
-                        <span class="{{ $etatClass }}">{{ ucfirst($actif->etat) }}</span>
-                    </li>
-                    @if($actif->description)
-                    <li class="list-group-item px-0">
-                        <span><i class="fas fa-info-circle me-2 text-primary"></i> Description</span>
-                        <p class="mb-0 mt-2 text-muted small">{{ $actif->description }}</p>
-                    </li>
-                    @endif
-                </ul>
-            </div>
-            <div class="card-footer">
-                <div class="btn-group w-100">
-                    @can('edit actifs')
-                    <a href="{{ route('admin.actifs.edit', $actif) }}" class="btn btn-warning">
-                        <i class="fas fa-edit me-2"></i>
-                        Modifier
-                    </a>
-                    @endcan
-                    @can('affect actifs')
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#affectationModal">
-                        <i class="fas fa-user-plus me-2"></i>
-                        Affecter
-                    </button>
-                    @endcan
-                    @can('delete actifs')
-                    <form method="POST" action="{{ route('admin.actifs.destroy', $actif) }}" class="d-inline">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit" class="btn btn-danger delete-confirm">
-                            <i class="fas fa-trash me-2"></i>
-                            Supprimer
-                        </button>
-                    </form>
-                    @endcan
+                <div class="flex items-center justify-between py-3 border-b border-slate-200/60 dark:border-slate-700">
+                    <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined text-lg">qr_code</span>
+                        <span>N° série</span>
+                    </div>
+                    <code class="text-xs text-slate-900 dark:text-white">{{ $actif->numero_serie }}</code>
                 </div>
+                
+                <div class="flex items-center justify-between py-3 border-b border-slate-200/60 dark:border-slate-700">
+                    <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined text-lg">event</span>
+                        <span>Acheté</span>
+                    </div>
+                    <span class="text-slate-900 dark:text-white">{{ $actif->date_achat ? $actif->date_achat->format('d/m/Y') : '-' }}</span>
+                </div>
+                
+                <div class="flex items-center justify-between py-3 border-b border-slate-200/60 dark:border-slate-700">
+                    <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined text-lg">verified_user</span>
+                        <span>Garantie</span>
+                    </div>
+                    @if($actif->garantie_fin)
+                        <div class="text-right">
+                            <span class="{{ $actif->garantieEstValide() ? 'text-emerald-600' : 'text-red-600' }} text-sm font-medium">
+                                {{ \Carbon\Carbon::parse($actif->garantie_fin)->format('d/m/Y') }}
+                            </span>
+                            @if($actif->garantieEstValide())
+                                <p class="text-xs text-slate-500">{{ $actif->jours_restants_garantie ?? \Carbon\Carbon::now()->diffInDays(\Carbon\Carbon::parse($actif->garantie_fin)) }} jours restants</p>
+                            @endif
+                        </div>
+                    @else
+                        <span class="text-slate-400">-</span>
+                    @endif
+                </div>
+                
+                <div class="flex items-center justify-between py-3 border-b border-slate-200/60 dark:border-slate-700">
+                    <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined text-lg">location_on</span>
+                        <span>Localisation</span>
+                    </div>
+                    <span class="text-slate-900 dark:text-white">{{ $actif->localisation?->nom_complet ?? '-' }}</span>
+                </div>
+                
+                <div class="flex items-center justify-between py-3 border-b border-slate-200/60 dark:border-slate-700">
+                    <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined text-lg">person</span>
+                        <span>Affecté à</span>
+                    </div>
+                    <span class="text-slate-900 dark:text-white">{{ $actif->utilisateurAffecte?->full_name ?? '-' }}</span>
+                </div>
+                
+                <div class="flex items-center justify-between py-3">
+                    <div class="flex items-center gap-2 text-slate-500 dark:text-slate-400">
+                        <span class="material-symbols-outlined text-lg">inventory_2</span>
+                        <span>État</span>
+                    </div>
+                    @php
+                    $etatClasses = [
+                        'neuf' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300',
+                        'bon' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
+                        'moyen' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
+                        'mauvais' => 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
+                        'hors_service' => 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
+                    ];
+                    $etatClass = $etatClasses[$actif->etat] ?? 'bg-slate-100 text-slate-700';
+                    @endphp
+                    <span class="px-3 py-1 rounded-full text-xs font-medium {{ $etatClass }}">{{ ucfirst($actif->etat) }}</span>
+                </div>
+                
+                @if($actif->description)
+                <div class="pt-3 border-t border-slate-200/60 dark:border-slate-700">
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mb-1">Description</p>
+                    <p class="text-sm text-slate-900 dark:text-white">{{ $actif->description }}</p>
+                </div>
+                @endif
             </div>
-            </div>
+        </div>
+        
+        <div class="px-6 pb-6 flex gap-2">
+            @can('edit actifs')
+            <a href="{{ route('admin.actifs.edit', $actif) }}" class="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-amber-500 hover:bg-amber-600 rounded-xl transition">
+                <span class="material-symbols-outlined">edit</span>
+                Modifier
+            </a>
+            @endcan
+            @can('delete actifs')
+            <form method="POST" action="{{ route('admin.actifs.destroy', $actif) }}" class="flex-1">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-xl transition delete-confirm">
+                    <span class="material-symbols-outlined">delete</span>
+                    Supprimer
+                </button>
+            </form>
+            @endcan
         </div>
     </div>
     
-    <!-- Tabs -->
-    <div class="col-lg-8 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <ul class="nav nav-tabs card-header-tabs" id="assetTabs" role="tablist">
-                    <li class="nav-item">
-                        <button class="nav-link active" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
-                            <i class="fas fa-history me-2"></i>
-                            Historique
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link" id="maintenance-tab" data-bs-toggle="tab" data-bs-target="#maintenance" type="button" role="tab">
-                            <i class="fas fa-tools me-2"></i>
-                            Maintenances
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link" id="software-tab" data-bs-toggle="tab" data-bs-target="#software" type="button" role="tab">
-                            <i class="fas fa-cube me-2"></i>
-                            Logiciels
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link" id="tickets-tab" data-bs-toggle="tab" data-bs-target="#tickets" type="button" role="tab">
-                            <i class="fas fa-ticket-alt me-2"></i>
-                            Tickets
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-link" id="comments-tab" data-bs-toggle="tab" data-bs-target="#comments" type="button" role="tab">
-                            <i class="fas fa-comments me-2"></i>
-                            Commentaires
-                        </button>
-                    </li>
-                </ul>
+    <!-- Tabs Content -->
+    <div class="lg:col-span-3 bg-white rounded-2xl shadow-sm border border-slate-200/60 dark:border-slate-700 dark:bg-slate-900 overflow-hidden">
+        <div class="border-b border-slate-200/60 dark:border-slate-700">
+            <nav class="flex space-x-4 px-4" aria-label="Tabs">
+                <button class="tab-btn active py-4 px-2 text-sm font-medium text-blue-600 border-b-2 border-blue-600" data-tab="history">
+                    <span class="material-symbols-outlined text-lg align-middle">history</span>
+                    Historique
+                </button>
+                <button class="tab-btn py-4 px-2 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400" data-tab="maintenance">
+                    <span class="material-symbols-outlined text-lg align-middle">build</span>
+                    Maintenances
+                </button>
+                <button class="tab-btn py-4 px-2 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400" data-tab="software">
+                    <span class="material-symbols-outlined text-lg align-middle">apps</span>
+                    Logiciels
+                </button>
+                <button class="tab-btn py-4 px-2 text-sm font-medium text-slate-500 hover:text-slate-700 dark:text-slate-400" data-tab="tickets">
+                    <span class="material-symbols-outlined text-lg align-middle">confirmation_number</span>
+                    Tickets
+                </button>
+            </nav>
+        </div>
+        
+        <div class="p-6">
+            <!-- History Tab -->
+            <div class="tab-content" id="history">
+                <div class="relative pl-6 border-l-2 border-slate-200 dark:border-slate-700">
+                    @forelse($actif->historiques()->latest()->take(10)->get() as $historique)
+                    <div class="relative pb-6">
+                        <div class="absolute -left-[31px] w-4 h-4 rounded-full bg-gradient-to-r from-cyan-500 to-blue-600 border-2 border-white dark:border-slate-900"></div>
+                        <h4 class="text-sm font-semibold text-slate-900 dark:text-white">{{ $historique->evenement }}</h4>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">{{ $historique->details }}</p>
+                        <p class="text-xs text-slate-400 mt-1">{{ $historique->created_at->format('d/m/Y H:i') }}</p>
+                    </div>
+                    @empty
+                    <div class="text-center py-8">
+                        <span class="material-symbols-outlined text-4xl text-slate-300">history</span>
+                        <p class="text-slate-500 mt-2">Aucun historique</p>
+                    </div>
+                    @endforelse
+                </div>
             </div>
-            <div class="card-body">
-                <div class="tab-content" id="assetTabsContent">
-                    <!-- History Tab -->
-                    <div class="tab-pane fade show active" id="history" role="tabpanel">
-                        <div class="timeline">
-                            @forelse($actif->historiques()->latest()->get() as $historique)
-                            <div class="timeline-item">
-                                <div class="timeline-marker"></div>
-                                <div class="timeline-content">
-                                    <h6 class="mb-1">{{ $historique->evenement }}</h6>
-                                    <p class="text-muted mb-2">{{ $historique->details }}</p>
-                                    <small class="text-muted">{{ $historique->created_at->format('d/m/Y H:i') }}</small>
-                                </div>
-                            </div>
+            
+            <!-- Maintenance Tab -->
+            <div class="tab-content hidden" id="maintenance">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-slate-200 dark:border-slate-700">
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Type</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Date</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                            @forelse($actif->maintenancesPreventives as $maintenance)
+                            <tr>
+                                <td class="py-3 px-4 text-slate-900 dark:text-white">{{ ucfirst($maintenance->type) }}</td>
+                                <td class="py-3 px-4 text-slate-500 dark:text-slate-400">{{ \Carbon\Carbon::parse($maintenance->date_prevue)->format('d/m/Y') }}</td>
+                                <td class="py-3 px-4">
+                                    @php
+                                    $statusClasses = [
+                                        'planifie' => 'bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300',
+                                        'en_cours' => 'bg-amber-100 text-amber-700 dark:bg-amber-900/50 dark:text-amber-300',
+                                        'termine' => 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/50 dark:text-emerald-300',
+                                        'annule' => 'bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-300',
+                                    ];
+                                    @endphp
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium {{ $statusClasses[$maintenance->statut] ?? 'bg-slate-100' }}">{{ ucfirst($maintenance->statut) }}</span>
+                                </td>
+                            </tr>
                             @empty
-                            <div class="text-center py-4">
-                                <i class="fas fa-history fa-2x text-muted mb-3"></i>
-                                <p class="text-muted">Aucun historique</p>
-                            </div>
+                            <tr>
+                                <td colspan="3" class="py-8 text-center">
+                                    <span class="material-symbols-outlined text-4xl text-slate-300">build</span>
+                                    <p class="text-slate-500 mt-2">Aucune maintenance</p>
+                                </td>
+                            </tr>
                             @endforelse
-                        </div>
-                    </div>
-                    
-                    <!-- Maintenance Tab -->
-                    <div class="tab-pane fade" id="maintenance" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>Type</th>
-                                        <th>Date prévue</th>
-                                        <th>Statut</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($actif->maintenancesPreventives as $maintenance)
-                                    <tr>
-                                        <td>{{ ucfirst($maintenance->type) }}</td>
-                                        <td>{{ \Carbon\Carbon::parse($maintenance->date_prevue)->format('d/m/Y') }}</td>
-                                        <td>
-                                            @php
-                                                $statusClass = [
-                                                    'planifie' => 'badge bg-primary',
-                                                    'en_cours' => 'badge bg-warning',
-                                                    'termine' => 'badge bg-success',
-                                                    'annule' => 'badge bg-danger'
-                                                ][$maintenance->statut] ?? 'badge bg-secondary';
-                                            @endphp
-                                            <span class="{{ $statusClass }}">{{ ucfirst($maintenance->statut) }}</span>
-                                        </td>
-                                        <td>
-                                            <a href="{{ route('admin.maintenances.show', $maintenance) }}" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="4" class="text-center py-4">
-                                            <i class="fas fa-tools fa-2x text-muted mb-3"></i>
-                                            <p class="text-muted">Aucune maintenance</p>
-                                        </td>
-                                    </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <!-- Software Tab -->
-                    <div class="tab-pane fade" id="software" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>Logiciel</th>
-                                        <th>Version</th>
-                                        <th>Licence</th>
-                                        <th>Date d'installation</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($actif->installationsLogiciels as $installation)
-                                    <tr>
-                                        <td>{{ $installation->licence->logiciel->nom }}</td>
-                                        <td>{{ $installation->licence->logiciel->version }}</td>
-                                        <td>
-                                            <span class="badge bg-info">{{ $installation->licence->cle_licence }}</span>
-                                        </td>
-                                        <td>{{ \Carbon\Carbon::parse($installation->date_installation)->format('d/m/Y') }}</td>
-                                        <td>
-                                            <form method="POST" action="{{ route('admin.logiciels.desinstaller', $installation) }}" class="d-inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="5" class="text-center py-4">
-                                            <i class="fas fa-cube fa-2x text-muted mb-3"></i>
-                                            <p class="text-muted">Aucun logiciel installé</p>
-                                        </td>
-                                    </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <!-- Tickets Tab -->
-                    <div class="tab-pane fade" id="tickets" role="tabpanel">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle">
-                                <thead>
-                                    <tr>
-                                        <th>Ticket</th>
-                                        <th>Sujet</th>
-                                        <th>Priorité</th>
-                                        <th>Statut</th>
-                                        <th>Créé le</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @forelse($actif->tickets as $ticket)
-                                    <tr>
-                                        <td><span class="fw-semibold">{{ $ticket->numero }}</span></td>
-                                        <td>{{ Str::limit($ticket->sujet, 40) }}</td>
-                                        <td>
-                                            @php
-                                                $priorityClass = [
-                                                    'basse' => 'badge bg-secondary',
-                                                    'moyenne' => 'badge bg-info',
-                                                    'haute' => 'badge bg-warning',
-                                                    'urgente' => 'badge bg-danger'
-                                                ][$ticket->priorite] ?? 'badge bg-secondary';
-                                            @endphp
-                                            <span class="{{ $priorityClass }}">{{ ucfirst($ticket->priorite) }}</span>
-                                        </td>
-                                        <td>
-                                            @php
-                                                $statusClass = [
-                                                    'ouvert' => 'badge-status active',
-                                                    'en_cours' => 'badge-status warning',
-                                                    'en_attente' => 'badge-status',
-                                                    'resolu' => 'badge-status success',
-                                                    'ferme' => 'badge-status'
-                                                ][$ticket->statut] ?? 'badge-status';
-                                            @endphp
-                                            <span class="{{ $statusClass }}">{{ ucfirst(str_replace('_', ' ', $ticket->statut)) }}</span>
-                                        </td>
-                                        <td>{{ $ticket->created_at->format('d/m/Y') }}</td>
-                                        <td>
-                                            <a href="{{ route('admin.tickets.show', $ticket) }}" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                        </td>
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="6" class="text-center py-4">
-                                            <i class="fas fa-ticket-alt fa-2x text-muted mb-3"></i>
-                                            <p class="text-muted">Aucun ticket</p>
-                                        </td>
-                                    </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                    
-                    <!-- Comments Tab -->
-                    <div class="tab-pane fade" id="comments" role="tabpanel">
-                        <div class="mb-4">
-                            <form method="POST" action="{{ route('admin.actifs.comment', $actif) }}">
-                                @csrf
-                                <div class="mb-3">
-                                    <label class="form-label">Ajouter un commentaire</label>
-                                    <textarea name="contenu" class="form-control" rows="3" required></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-paper-plane me-2"></i>
-                                    Commenter
-                                </button>
-                            </form>
-                        </div>
-                        
-                        <div class="comments-list">
-                            @forelse($actif->commentaires()->latest()->get() as $commentaire)
-                            <div class="comment-item">
-                                <div class="d-flex align-items-center mb-2">
-                                    <div class="avatar-sm blue me-2" style="width: 40px; height: 40px;">
-                                        {{ $commentaire->utilisateur->initials ?? 'U' }}
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">{{ $commentaire->utilisateur->full_name ?? $commentaire->utilisateur->name }}</h6>
-                                        <small class="text-muted">{{ $commentaire->created_at->diffForHumans() }}</small>
-                                    </div>
-                                </div>
-                                <p class="mb-0 ms-5">{{ $commentaire->contenu }}</p>
-                                <hr>
-                            </div>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Software Tab -->
+            <div class="tab-content hidden" id="software">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-slate-200 dark:border-slate-700">
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Logiciel</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Version</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Licence</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                            @forelse($actif->installationsLogiciels as $installation)
+                            <tr>
+                                <td class="py-3 px-4 text-slate-900 dark:text-white">{{ $installation->licence->logiciel->nom }}</td>
+                                <td class="py-3 px-4 text-slate-500 dark:text-slate-400">{{ $installation->licence->logiciel->version }}</td>
+                                <td class="py-3 px-4 text-slate-500 dark:text-slate-400">{{ $installation->licence->cle_licence }}</td>
+                            </tr>
                             @empty
-                            <div class="text-center py-4">
-                                <i class="fas fa-comments fa-2x text-muted mb-3"></i>
-                                <p class="text-muted">Aucun commentaire</p>
-                            </div>
+                            <tr>
+                                <td colspan="3" class="py-8 text-center">
+                                    <span class="material-symbols-outlined text-4xl text-slate-300">apps</span>
+                                    <p class="text-slate-500 mt-2">Aucun logiciel installé</p>
+                                </td>
+                            </tr>
                             @endforelse
-                        </div>
-                    </div>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Tickets Tab -->
+            <div class="tab-content hidden" id="tickets">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="border-b border-slate-200 dark:border-slate-700">
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Ticket</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Sujet</th>
+                                <th class="text-left py-3 px-4 text-xs font-semibold text-slate-500 uppercase">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-200 dark:divide-slate-700">
+                            @forelse($actif->tickets as $ticket)
+                            <tr>
+                                <td class="py-3 px-4 text-slate-900 dark:text-white font-medium">{{ $ticket->numero }}</td>
+                                <td class="py-3 px-4 text-slate-500 dark:text-slate-400">{{ Str::limit($ticket->sujet, 40) }}</td>
+                                <td class="py-3 px-4">
+                                    <span class="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">{{ ucfirst($ticket->statut) }}</span>
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="3" class="py-8 text-center">
+                                    <span class="material-symbols-outlined text-4xl text-slate-300">confirmation_number</span>
+                                    <p class="text-slate-500 mt-2">Aucun ticket</p>
+                                </td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Assignment Modal -->
-<div class="modal fade" id="affectationModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <form method="POST" action="{{ route('admin.actifs.affecter', $actif) }}">
-                @csrf
-                <div class="modal-header">
-                    <h5 class="modal-title">Affecter l'actif</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label class="form-label">Utilisateur</label>
-                        <select name="utilisateur_id" class="form-select select2" required>
-                            <option value="">Sélectionner...</option>
-                            @foreach($utilisateurs ?? [] as $user)
-                                <option value="{{ $user->id }}">
-                                    {{ $user->full_name ?? $user->name }} ({{ $user->email }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Date d'affectation</label>
-                        <input type="date" name="date_debut" class="form-control" value="{{ now()->format('Y-m-d') }}" required>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="submit" class="btn btn-primary">Affecter</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-
-@push('styles')
-<style>
-.timeline {
-    position: relative;
-    padding-left: 1.5rem;
-}
-.timeline-item {
-    position: relative;
-    padding-bottom: 1.5rem;
-}
-.timeline-marker {
-    position: absolute;
-    left: -1.5rem;
-    top: 0.25rem;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #3b7cff;
-    border: 2px solid white;
-    box-shadow: 0 0 0 2px rgba(59, 124, 255, 0.3);
-}
-.timeline-item::before {
-    content: '';
-    position: absolute;
-    left: -1.05rem;
-    top: 0.75rem;
-    width: 2px;
-    height: calc(100% - 0.75rem);
-    background: #e2e8f0;
-}
-.timeline-item:last-child::before {
-    display: none;
-}
-.timeline-content {
-    padding-left: 0.5rem;
-}
-.comment-item {
-    margin-bottom: 1rem;
-}
-</style>
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            // Update buttons
+            document.querySelectorAll('.tab-btn').forEach(b => {
+                b.classList.remove('active', 'text-blue-600', 'border-b-2', 'border-blue-600');
+                b.classList.add('text-slate-500');
+            });
+            this.classList.add('active', 'text-blue-600', 'border-b-2', 'border-blue-600');
+            this.classList.remove('text-slate-500');
+            
+            // Update content
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+            document.getElementById(this.dataset.tab).classList.remove('hidden');
+        });
+    });
+});
+</script>
 @endpush
 @endsection
-
-
